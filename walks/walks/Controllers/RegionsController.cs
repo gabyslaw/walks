@@ -24,15 +24,105 @@ namespace walks.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllRegions()
+        public async Task<IActionResult> GetAllRegionsAsync()
         {
-            var regions = await _regionRepository.GetAllRegion();
+            var regions = await _regionRepository.GetAllRegionAsync();
 
             if(regions == null) return NotFound();
 
             var regionsDto = _mapper.Map<List<RegionDto>>(regions);
 
             return Ok(regionsDto);
+        }
+
+        [HttpGet]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> GetRegionAsync(Guid id)
+        {
+            var region = await _regionRepository.GetRegionAsync(id);
+            
+            if(region == null) return NotFound();
+
+            var regionDto = _mapper.Map<RegionDto>(region);
+
+            return Ok(regionDto);
+        }
+
+        [HttpPost]
+        [ActionName("GetRegionAsync")]
+        public async Task<IActionResult> AddRegionsAsync(AddRegionRequestDto regionDto)
+        {
+            var region = new Region()
+            {
+                Area = regionDto.Area,
+                Code = regionDto.Code,
+                Lat = regionDto.Lat,
+                Long = regionDto.Long,
+                Name = regionDto.Name,
+                Population = regionDto.Population
+            };
+
+            region = await _regionRepository.AddAsync(region);
+
+            var regionDtoData = new RegionDto()
+            {
+                Id = region.Id,
+                Area = region.Area,
+                Code = region.Code,
+                Lat = region.Lat,
+                Long = region.Long,
+                Name = region.Name,
+                Population = region.Population
+            };
+
+            return CreatedAtAction(nameof(GetRegionAsync), new { id = regionDtoData.Id }, regionDtoData);
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> DeleteRegionAsync(Guid id)
+        {
+
+            var regionToDelete = await _regionRepository.DeleteAsync(id);
+
+            if(regionToDelete == null) return NotFound();
+
+            var regionDto = _mapper.Map<RegionDto>(regionToDelete); 
+
+            return Ok(regionDto);
+            
+        }
+
+        [HttpPut]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> UpdateRegionAsync([FromRoute]Guid id, [FromBody]UpdateRegionDto regionDto)
+        {
+            var region = new Region()
+            {
+                Area = regionDto.Area,
+                Code = regionDto.Code,
+                Lat = regionDto.Lat,
+                Long = regionDto.Long,
+                Name = regionDto.Name,
+                Population = regionDto.Population
+            };
+
+            region = await _regionRepository.UpdateAsync(id, region);
+
+            if(region == null) return NotFound();
+
+            var regionDtoData = new RegionDto()
+            {
+                Id = region.Id,
+                Area = region.Area,
+                Code = region.Code,
+                Lat = region.Lat,
+                Long = region.Long,
+                Name = region.Name,
+                Population = region.Population
+            };
+
+            return Ok(regionDtoData);
         }
     }
 }
