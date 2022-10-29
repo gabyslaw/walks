@@ -28,7 +28,7 @@ namespace walks.Controllers
         {
             var regions = await _regionRepository.GetAllRegionAsync();
 
-            if(regions == null) return NotFound();
+            if (regions == null) return NotFound();
 
             var regionsDto = _mapper.Map<List<RegionDto>>(regions);
 
@@ -40,8 +40,8 @@ namespace walks.Controllers
         public async Task<IActionResult> GetRegionAsync(Guid id)
         {
             var region = await _regionRepository.GetRegionAsync(id);
-            
-            if(region == null) return NotFound();
+
+            if (region == null) return NotFound();
 
             var regionDto = _mapper.Map<RegionDto>(region);
 
@@ -52,6 +52,13 @@ namespace walks.Controllers
         [ActionName("GetRegionAsync")]
         public async Task<IActionResult> AddRegionsAsync(AddRegionRequestDto regionDto)
         {
+            //Validate the request
+
+            if (!ValidateAddRegionAsync(regionDto))
+            {
+                return BadRequest(ModelState);
+            }
+
             var region = new Region()
             {
                 Area = regionDto.Area,
@@ -85,17 +92,18 @@ namespace walks.Controllers
 
             var regionToDelete = await _regionRepository.DeleteAsync(id);
 
-            if(regionToDelete == null) return NotFound();
+            if (regionToDelete == null) return NotFound();
 
-            var regionDto = _mapper.Map<RegionDto>(regionToDelete); 
+            var regionDto = _mapper.Map<RegionDto>(regionToDelete);
 
             return Ok(regionDto);
-            
+
         }
+
 
         [HttpPut]
         [Route("{id:guid}")]
-        public async Task<IActionResult> UpdateRegionAsync([FromRoute]Guid id, [FromBody]UpdateRegionDto regionDto)
+        public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] UpdateRegionDto regionDto)
         {
             var region = new Region()
             {
@@ -109,7 +117,7 @@ namespace walks.Controllers
 
             region = await _regionRepository.UpdateAsync(id, region);
 
-            if(region == null) return NotFound();
+            if (region == null) return NotFound();
 
             var regionDtoData = new RegionDto()
             {
@@ -124,5 +132,37 @@ namespace walks.Controllers
 
             return Ok(regionDtoData);
         }
+
+        #region Private methods
+
+        private bool ValidateAddRegionAsync(AddRegionRequestDto addRegionRequest)
+        {
+            if(addRegionRequest == null)
+            {
+                ModelState.AddModelError(nameof(addRegionRequest), $"cannot be null, empty or with whitespace");
+                
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(addRegionRequest.Code))
+            {
+                ModelState.AddModelError(nameof(addRegionRequest.Code), $"{nameof(addRegionRequest.Code)} cannot be null, empty or with whitespace");
+            }
+
+            if (addRegionRequest.Area <= 0)
+            {
+                ModelState.AddModelError(nameof(addRegionRequest.Area), $"{nameof(addRegionRequest.Area)} cannot be less than or equals to zero");
+
+            }
+
+            if(ModelState.ErrorCount > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
     }
 }

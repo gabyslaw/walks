@@ -14,6 +14,6 @@ namespace walks.Models.Dto
 
         //Navigation Property
 
-        public IEnumerable<WalkDto> Walks { get; set; }
+       // public IEnumerable<WalkDto> Walks { get; set; }
     }
 }

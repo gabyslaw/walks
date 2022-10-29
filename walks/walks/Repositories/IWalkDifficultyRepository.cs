@@ -1,6 +1,13 @@
-﻿namespace walks.Repositories
+﻿using walks.Models.Domain;
+
+namespace walks.Repositories
 {
-    public class IWalkDifficultyRepository
+    public interface IWalkDifficultyRepository
     {
+        Task<IEnumerable<WalkDifficulty>> GetAllAsync();
+        Task<WalkDifficulty> GetAsync(Guid id);
+        Task<WalkDifficulty> AddAsync(WalkDifficulty walkDifficulty);
+        Task<WalkDifficulty> UpdateAsync(Guid id, WalkDifficulty walkDifficulty);
+        Task<WalkDifficulty> DeleteAsync(Guid id);
     }
 }
